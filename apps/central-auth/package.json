@@ -1,0 +1,21 @@
+{
+    "name": "central-auth",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Central Auth Service - SSO with RBAC",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "node dist/index.js",
+        "dev": "nodemon --watch src --exec ts-node src/index.ts",
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "sso",
+        "auth",
+        "rbac",
+        "jwt"
+    ],
+    "author": "",
+    "license": "ISC"
+}

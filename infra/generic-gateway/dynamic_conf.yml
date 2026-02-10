@@ -1,0 +1,13 @@
+http:
+  routers:
+    dashboard:
+      rule: "Host(`traefik.localhost`)"
+      service: api@internal
+      entryPoints:
+        - web
+
+  services:
+    noop:
+      loadBalancer:
+        servers:
+          - url: "http://localhost:8080" # Placeholder

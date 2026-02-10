@@ -1,0 +1,20 @@
+{
+    "name": "master-orchestrator",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Master Orchestrator - Multi-tenant dynamic database management",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "node dist/index.js",
+        "dev": "nodemon --watch src --exec \"node --loader ts-node/esm\" src/index.ts",
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "multi-tenant",
+        "saas",
+        "orchestrator"
+    ],
+    "author": "",
+    "license": "ISC"
+}

@@ -1,0 +1,16 @@
+# Test-specific Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm ci --legacy-peer-deps
+
+# Copy source code and test files
+COPY . .
+
+# Run tests
+CMD ["npm", "test"]

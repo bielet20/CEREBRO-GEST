@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: master-orchestrator-postgres
+    environment:
+      POSTGRES_DB: master_orchestrator
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d master_orchestrator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - master-network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7-jammy
+    container_name: master-orchestrator-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secret123}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - master-network
+
+  # Master Orchestrator Service
+  master-orchestrator:
+    build:
+      context: ./apps/master-orchestrator
+      dockerfile: Dockerfile
+    container_name: master-orchestrator
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=master_orchestrator
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret123}
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-secret123}@mongodb:27017
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - master-network
+    restart: unless-stopped
+
+  # Central Auth Service
+  central-auth:
+    build:
+      context: ./apps/central-auth
+      dockerfile: Dockerfile
+    container_name: central-auth
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_EXPIRATION=24h
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=master_orchestrator
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - master-network
+    restart: unless-stopped
+
+  # AI Consultant Service
+  ai-consultant:
+    build:
+      context: ./apps/ai-consultant
+      dockerfile: Dockerfile
+    container_name: ai-consultant
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - master-network
+    restart: unless-stopped
+
+  # Admin Dashboard
+  admin-dashboard:
+    build:
+      context: ./apps/admin-dashboard
+      dockerfile: Dockerfile
+    container_name: admin-dashboard
+    ports:
+      - "80:80"
+    depends_on:
+      - master-orchestrator
+      - central-auth
+      - ai-consultant
+    networks:
+      - master-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  mongo_data:
+    driver: local
+
+networks:
+  master-network:
+    driver: bridge
