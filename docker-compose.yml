@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: master_orchestrator
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret123}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -27,7 +27,7 @@ services:
     container_name: master-orchestrator-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secret123}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
       - "27017:27017"
     volumes:
@@ -55,8 +55,8 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_DB=master_orchestrator
       - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret123}
-      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-secret123}@mongodb:27017
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,13 +77,13 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION=24h
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=master_orchestrator
       - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret123}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
